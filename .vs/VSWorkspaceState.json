@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\features\\dashboard\\components",
+    "\\features\\dashboard\\hooks",
+    "\\features\\dashboard\\services",
+    "\\features\\dashboard\\types",
+    "\\features\\transfer\\components",
+    "\\features\\transfer\\schemas",
+    "\\features\\transfer\\services",
+    "\\features\\transfer\\types",
+    "\\src"
+  ],
+  "SelectedNode": "\\features",
+  "PreviewInSolutionExplorer": false
+}
