@@ -191,8 +191,6 @@ export function LoginPage() {
                                 {isSubmitting ? 'Entrando...' : 'Entrar'}
                             </button>
 
-                            <RegisterUserDialog onUserCreated={handleUserCreated} />
-
                             <button
                                 type="button"
                                 onClick={handleClearAllData}
@@ -202,6 +200,9 @@ export function LoginPage() {
                             </button>
                         </div>
                     </form>
+                    <div className="mt-4">
+                        <RegisterUserDialog onUserCreated={handleUserCreated} />
+                    </div>
                 </section>
 
                 <aside className="space-y-6">

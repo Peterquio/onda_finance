@@ -3,7 +3,9 @@ import { hashPassword } from './auth.crypto'
 
 const USERS_STORAGE_KEY = 'onda-finance:users'
 const LAST_USERNAME_STORAGE_KEY = 'onda-finance:last-username'
-
+function normalizeUsername(username: string): string {
+    return username.trim().toLowerCase()
+}
 function safeJsonParse<T>(value: string | null, fallback: T): T {
     if (!value) {
         return fallback
@@ -30,10 +32,10 @@ function saveStoredUsers(users: LocalUser[]): void {
 }
 
 export function getUserByUsername(username: string): LocalUser | undefined {
-    const normalizedUsername = username.trim().toLowerCase()
+    const normalizedUsername = normalizeUsername(username)
 
     return getStoredUsers().find(
-        (user) => user.username.trim().toLowerCase() === normalizedUsername,
+        (user) => normalizeUsername(user.username) === normalizedUsername,
     )
 }
 
@@ -64,7 +66,7 @@ export async function registerLocalUser(
         birthDate: userData.birthDate,
         email: userData.email.trim().toLowerCase(),
         phone: userData.phone.trim(),
-        username: userData.username.trim(),
+        username: normalizeUsername(userData.username),
         passwordHash,
         createdAt: new Date().toISOString(),
     }
