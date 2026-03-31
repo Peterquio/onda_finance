@@ -18,7 +18,6 @@ type PixDraft = {
 }
 
 type PixStore = {
-    pixPassword: string
     simulatedToken: string
 
     recentContacts: PixContact[]
@@ -40,7 +39,6 @@ type PixStore = {
 
     confirmTransfer: () => void
     resetDraft: () => void
-    updatePixPassword: (newPassword: string) => void
 }
 
 const initialDraft: PixDraft = {
@@ -53,7 +51,6 @@ const initialDraft: PixDraft = {
 }
 
 export const usePixStore = create<PixStore>((set, get) => ({
-    pixPassword: "1234",
     simulatedToken: "000000",
 
     recentContacts: [
@@ -84,6 +81,7 @@ export const usePixStore = create<PixStore>((set, get) => ({
     ],
 
     logs: [],
+    transferHistory: [],
     lastReceipt: null,
 
     draft: initialDraft,
@@ -167,19 +165,15 @@ export const usePixStore = create<PixStore>((set, get) => ({
             transactionId: receipt.transactionId,
         })
         useDashboardStore.getState().decreaseBalance(draft.amount)
-        set({
+        set((state) => ({
+            transferHistory: [receipt, ...state.transferHistory],
             lastReceipt: receipt,
             draft: initialDraft,
-        })
+        }))
     },
 
     resetDraft: () =>
         set({
             draft: initialDraft,
-        }),
-
-    updatePixPassword: (newPassword) =>
-        set({
-            pixPassword: newPassword,
         }),
 }))

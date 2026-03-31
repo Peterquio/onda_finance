@@ -1,13 +1,14 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { PixPasswordInput } from "../components/pix-password-input"
 import { usePixStore } from "../store/pix.store"
-
+import { useAuthStore } from "@/features/auth/store/auth.store"
+import { comparePassword } from "@/features/auth/services/auth.crypto"
 export default function PixAuthPage() {
     const navigate = useNavigate()
 
     const {
         draft,
-        pixPassword,
         simulatedToken,
         setPassword,
         setToken,
@@ -15,32 +16,58 @@ export default function PixAuthPage() {
         addLog,
     } = usePixStore()
 
-    function handleSubmit() {
+    const currentUser = useAuthStore((state) => state.user)
+    const [feedbackMessage, setFeedbackMessage] = useState("")
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    async function handleSubmit() {
+        if (!currentUser) {
+            setFeedbackMessage("Sessão inválida. Faça login novamente.")
+            return
+        }
+
+        if (!currentUser.hasPixSecurityConfigured || !currentUser.pixPinHash) {
+            setFeedbackMessage("Você ainda não configurou sua senha PIX.")
+            return
+        }
+
         if (draft.password.length !== 4) {
-            alert("A senha PIX deve ter 4 dígitos.")
+            setFeedbackMessage("A senha PIX deve ter 4 dígitos.")
             return
         }
 
         if (draft.token !== simulatedToken) {
-            alert("Token inválido.")
+            setFeedbackMessage("Token inválido.")
             return
         }
 
-        if (draft.password !== pixPassword) {
-            alert("Senha PIX inválida.")
-            return
+        try {
+            setIsSubmitting(true)
+            setFeedbackMessage("")
+
+            const isPixPasswordValid = await comparePassword(
+                draft.password,
+                currentUser.pixPinHash,
+            )
+
+            if (!isPixPasswordValid) {
+                setFeedbackMessage("Senha PIX inválida.")
+                return
+            }
+
+            addLog("PIX_PASSWORD_FILLED", {
+                passwordLength: draft.password.length,
+            })
+
+            addLog("PIX_TOKEN_FILLED", {
+                tokenLength: draft.token.length,
+            })
+
+            confirmTransfer()
+            navigate("/pix/receipt")
+        } finally {
+            setIsSubmitting(false)
         }
-
-        addLog("PIX_PASSWORD_FILLED", {
-            passwordLength: draft.password.length,
-        })
-
-        addLog("PIX_TOKEN_FILLED", {
-            tokenLength: draft.token.length,
-        })
-
-        confirmTransfer()
-        navigate("/pix/receipt")
     }
 
     return (
@@ -51,7 +78,6 @@ export default function PixAuthPage() {
                     Informe sua senha de 4 dígitos e o token simulado.
                 </p>
             </div>
-
             <div className="space-y-4 rounded-2xl border p-4">
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Senha PIX</label>
@@ -74,13 +100,18 @@ export default function PixAuthPage() {
                         Token de teste atual: {simulatedToken}
                     </p>
                 </div>
-
+                {feedbackMessage && (
+                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700">
+                        {feedbackMessage}
+                    </div>
+                )}
                 <button
                     type="button"
                     onClick={handleSubmit}
-                    className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground"
+                    disabled={isSubmitting}
+                    className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    Enviar PIX
+                    {isSubmitting ? "Validando..." : "Enviar PIX"}
                 </button>
             </div>
         </div>
