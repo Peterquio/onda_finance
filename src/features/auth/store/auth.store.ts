@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 import type { AuthSession } from '../types/auth.types'
 import { comparePassword } from '../services/auth.crypto'
 import {
+    getUserById,
     getUserByUsername,
     rememberLastUsername,
 } from '../services/auth.storage'
@@ -25,6 +26,7 @@ type AuthStore = AuthSession & {
     login: (params: LoginParams) => Promise<LoginResult>
     logout: () => void
     clearSession: () => void
+    refreshCurrentUser: () => void
 }
 
 const initialState: AuthSession = {
@@ -103,6 +105,28 @@ export const useAuthStore = create<AuthStore>()(
                     isAuthenticated: false,
                     user: null,
                     loggedAt: null,
+                })
+            },
+            refreshCurrentUser: () => {
+                set((state) => {
+                    if (!state.user) {
+                        return state
+                    }
+
+                    const freshUser = getUserById(state.user.id)
+
+                    if (!freshUser) {
+                        return {
+                            isAuthenticated: false,
+                            user: null,
+                            loggedAt: null,
+                        }
+                    }
+
+                    return {
+                        ...state,
+                        user: freshUser,
+                    }
                 })
             },
         }),

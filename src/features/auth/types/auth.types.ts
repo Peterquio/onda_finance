@@ -7,7 +7,12 @@ export type LocalUser = {
     phone: string
     username: string
     passwordHash: string
+    pixPinHash: string | null
+    secretQuestion: string | null
+    secretAnswerHash: string | null
+    hasPixSecurityConfigured: boolean
     createdAt: string
+    updatedAt?: string
 }
 
 export type RegisterUserInput = {

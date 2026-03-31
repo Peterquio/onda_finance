@@ -54,11 +54,20 @@ export function LoginPage() {
         }
     }, [setValue])
 
+    const currentUser = useAuthStore((state) => state.user)
+
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/dashboard')
+        if (!isAuthenticated) {
+            return
         }
-    }, [isAuthenticated, navigate])
+
+        if (currentUser && !currentUser.hasPixSecurityConfigured) {
+            navigate('/setup-pix-security')
+            return
+        }
+
+        navigate('/dashboard')
+    }, [currentUser, isAuthenticated, navigate])
 
     function refreshToken() {
         setTokenCode(generateTokenCode())
@@ -89,6 +98,13 @@ export function LoginPage() {
             if (!result.success) {
                 setFeedbackMessage(result.message)
                 refreshToken()
+                return
+            }
+
+            const loggedUser = useAuthStore.getState().user
+
+            if (loggedUser && !loggedUser.hasPixSecurityConfigured) {
+                navigate('/setup-pix-security')
                 return
             }
 

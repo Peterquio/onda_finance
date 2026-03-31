@@ -1,4 +1,7 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDashboardStore } from "../store/dashboard.store";
+import { useAuthStore } from "@/features/auth/store/auth.store";
 import {
     Bell,
     Bug,
@@ -32,10 +35,15 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
     currency: "BRL",
 });
 
-function QuickActionButton({ label, icon: Icon }: QuickAction) {
+function QuickActionButton({
+    label,
+    icon: Icon,
+    onClick,
+}: QuickAction & { onClick?: () => void }) {
     return (
         <button
             type="button"
+            onClick={onClick}
             className="group flex flex-col items-center gap-2 text-center"
         >
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary transition-all duration-200 group-hover:scale-105 group-hover:bg-primary/15">
@@ -81,14 +89,21 @@ function DebugTransferButton({
 }
 
 export default function DashboardPage() {
+    const navigate = useNavigate();
+    const logout = useAuthStore((state) => state.logout);
+    const currentUser = useAuthStore((state) => state.user);
+
     const [showBalance, setShowBalance] = useState(true);
-    const [balance, setBalance] = useState(2480.35);
-    const [limit] = useState(1500);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const balance = useDashboardStore((state) => state.balance);
+    const limit = useDashboardStore((state) => state.limit);
+    const receiveTransfer = useDashboardStore((state) => state.receiveTransfer);
 
     const totalWithLimit = useMemo(() => balance + limit, [balance, limit]);
 
     const handleDebugTransfer = (amount: number) => {
-        setBalance((current) => current + amount);
+        receiveTransfer(amount);
     };
 
     return (
@@ -98,6 +113,7 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
+                            onClick={() => setIsMenuOpen((current) => !current)}
                             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                             aria-label="Abrir menu"
                         >
@@ -132,10 +148,37 @@ export default function DashboardPage() {
                         </button>
                     </div>
                 </header>
+                {isMenuOpen && (
+                    <div className="rounded-2xl border bg-card p-2 shadow-sm">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsMenuOpen(false);
+                                navigate("/settings/change-pix-password");
+                            }}
+                            className="w-full rounded-xl px-3 py-2 text-left text-sm transition hover:bg-accent"
+                        >
+                            Trocar senha PIX
+                        </button>
 
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsMenuOpen(false);
+                                logout();
+                                navigate("/");
+                            }}
+                            className="w-full rounded-xl px-3 py-2 text-left text-sm transition hover:bg-accent"
+                        >
+                            Deslogar
+                        </button>
+                    </div>
+                )}
                 <section className="px-1">
                     <p className="text-sm text-muted-foreground">Bem-vindo</p>
-                    <h2 className="text-2xl font-bold tracking-tight text-foreground">Diego</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                        {currentUser?.fullName ?? "Cliente"}
+                    </h2>
                 </section>
 
                 <Card className="overflow-hidden rounded-3xl border-0 bg-primary text-primary-foreground shadow-lg">
@@ -175,7 +218,11 @@ export default function DashboardPage() {
 
                         <div className="grid grid-cols-4 gap-3 rounded-2xl bg-background/10 p-3 backdrop-blur-sm">
                             {quickActions.map((action) => (
-                                <QuickActionButton key={action.label} {...action} />
+                                <QuickActionButton
+                                    key={action.label}
+                                    {...action}
+                                    onClick={action.label === "Pix" ? () => navigate("/pix") : undefined}
+                                />
                             ))}
                         </div>
                     </CardContent>
