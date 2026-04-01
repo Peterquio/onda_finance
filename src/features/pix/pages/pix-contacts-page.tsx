@@ -46,6 +46,11 @@ export default function PixContactsPage() {
         navigate("/pix/amount")
     }
 
+    function handleCancel() {
+        resetDraft()
+        navigate("/dashboard")
+    }
+
     useEffect(() => {
         resetDraft()
         addLog("PIX_OPENED")
@@ -83,13 +88,23 @@ export default function PixContactsPage() {
                     />
                 </div>
 
-                <button
-                    type="button"
-                    onClick={handleContinue}
-                    className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground"
-                >
-                    Continuar
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="w-full rounded-2xl border px-4 py-3"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={handleContinue}
+                        className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground"
+                    >
+                        Continuar
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-3">

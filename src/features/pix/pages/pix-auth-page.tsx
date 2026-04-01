@@ -14,6 +14,7 @@ export default function PixAuthPage() {
         setToken,
         confirmTransfer,
         addLog,
+        resetDraft,
     } = usePixStore()
 
     const currentUser = useAuthStore((state) => state.user)
@@ -69,6 +70,10 @@ export default function PixAuthPage() {
             setIsSubmitting(false)
         }
     }
+    function handleCancel() {
+        resetDraft()
+        navigate("/dashboard")
+    }
 
     return (
         <div className="mx-auto max-w-xl space-y-6 p-6">
@@ -105,14 +110,25 @@ export default function PixAuthPage() {
                         {feedbackMessage}
                     </div>
                 )}
-                <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    {isSubmitting ? "Validando..." : "Enviar PIX"}
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        disabled={isSubmitting}
+                        className="w-full rounded-2xl border px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {isSubmitting ? "Validando..." : "Enviar PIX"}
+                    </button>
+                </div>
             </div>
         </div>
     )

@@ -6,7 +6,7 @@ import { digitsToMoney, formatCurrencyBRL, moneyToDigits } from "../utils/curren
 
 export default function PixAmountPage() {
     const navigate = useNavigate()
-    const { draft, setAmount, addLog } = usePixStore()
+    const { draft, setAmount, addLog, resetDraft } = usePixStore()
 
     const [digits, setDigits] = useState(moneyToDigits(draft.amount))
 
@@ -38,6 +38,11 @@ export default function PixAmountPage() {
         navigate("/pix/auth")
     }
 
+    function handleCancel() {
+        resetDraft()
+        navigate("/dashboard")
+    }
+
     return (
         <div className="mx-auto max-w-xl space-y-6 p-6">
             <div>
@@ -63,13 +68,23 @@ export default function PixAmountPage() {
 
             <PixKeypad onKeyPress={appendDigit} onBackspace={removeDigit} />
 
-            <button
-                type="button"
-                onClick={handleConfirm}
-                className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground"
-            >
-                Confirmar valor
-            </button>
+            <div className="flex gap-3">
+                <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="w-full rounded-2xl border px-4 py-3"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    onClick={handleConfirm}
+                    className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground"
+                >
+                    Confirmar valor
+                </button>
+            </div>
         </div>
     )
 }

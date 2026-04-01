@@ -21,7 +21,7 @@ export default function PixReceiptPage() {
             transactionId: lastReceipt.transactionId,
         })
 
-        navigate("/")
+        navigate("/dashboard")
     }
 
     return (
@@ -90,7 +90,7 @@ export default function PixReceiptPage() {
                 onClick={handleFinish}
                 className="w-full rounded-2xl bg-primary px-4 py-3 text-primary-foreground"
             >
-                Concluir
+                Voltar ao Início
             </button>
         </div>
     )

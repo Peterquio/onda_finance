@@ -39,17 +39,28 @@ function QuickActionButton({
     label,
     icon: Icon,
     onClick,
-}: QuickAction & { onClick?: () => void }) {
+    isActive = false,
+}: QuickAction & { onClick?: () => void; isActive?: boolean }) {
     return (
         <button
             type="button"
             onClick={onClick}
             className="group flex flex-col items-center gap-2 text-center"
         >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary transition-all duration-200 group-hover:scale-105 group-hover:bg-primary/15">
+            <div
+                className={`flex h-16 w-16 items-center justify-center rounded-full border shadow-sm transition-all duration-200
+                ${isActive
+                        ? "scale-100 border-green-600 bg-green-600 text-white"
+                        : "border-border bg-white text-primary group-hover:scale-110 group-hover:border-green-600 group-hover:bg-green-600 group-hover:text-white active:scale-100"
+                    }`}
+            >
                 <Icon className="h-6 w-6" />
             </div>
-            <span className="max-w-[88px] text-xs font-medium leading-tight text-muted-foreground sm:text-sm">
+
+            <span
+                className={`max-w-[88px] text-xs font-medium leading-tight transition-colors sm:text-sm ${isActive ? "text-green-700" : "text-muted-foreground group-hover:text-green-700"
+                    }`}
+            >
                 {label}
             </span>
         </button>
@@ -234,6 +245,7 @@ export default function DashboardPage() {
                                     key={action.label}
                                     {...action}
                                     onClick={() => handleQuickAction(action.label)}
+                                    isActive={action.label === "Extrato" && isStatementOpen}
                                 />
                             ))}
                         </div>
