@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useDashboardStore } from "../store/dashboard.store";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import {
@@ -40,7 +41,12 @@ function QuickActionButton({
     icon: Icon,
     onClick,
     isActive = false,
-}: QuickAction & { onClick?: () => void; isActive?: boolean }) {
+    hoverVariant = "green",
+}: QuickAction & {
+    onClick?: () => void
+    isActive?: boolean
+    hoverVariant?: "green" | "red"
+}) {
     return (
         <button
             type="button"
@@ -48,17 +54,22 @@ function QuickActionButton({
             className="group flex flex-col items-center gap-2 text-center"
         >
             <div
-                className={`flex h-16 w-16 items-center justify-center rounded-full border shadow-sm transition-all duration-200
-                ${isActive
+                className={`flex h-16 w-16 items-center justify-center rounded-full border shadow-sm transition-all duration-200 ${isActive
                         ? "scale-100 border-green-600 bg-green-600 text-white"
-                        : "border-border bg-white text-primary group-hover:scale-110 group-hover:border-green-600 group-hover:bg-green-600 group-hover:text-white active:scale-100"
+                        : hoverVariant === "red"
+                            ? "border-border bg-white text-primary group-hover:scale-110 group-hover:border-red-600 group-hover:bg-red-600 group-hover:text-white active:scale-100"
+                            : "border-border bg-white text-primary group-hover:scale-110 group-hover:border-green-600 group-hover:bg-green-600 group-hover:text-white active:scale-100"
                     }`}
             >
                 <Icon className="h-6 w-6" />
             </div>
 
             <span
-                className={`max-w-[88px] text-xs font-medium leading-tight transition-colors sm:text-sm ${isActive ? "text-green-700" : "text-muted-foreground group-hover:text-green-700"
+                className={`max-w-[88px] text-xs font-medium leading-tight transition-colors sm:text-sm ${isActive
+                        ? "text-green-700"
+                        : hoverVariant === "red"
+                            ? "text-muted-foreground group-hover:text-red-700"
+                            : "text-muted-foreground group-hover:text-green-700"
                     }`}
             >
                 {label}
@@ -117,6 +128,10 @@ export default function DashboardPage() {
 
     const handleDebugTransfer = (amount: number) => {
         receiveTransfer(amount);
+
+        toast.success("PIX recebido com sucesso!", {
+            description: `Você recebeu ${currencyFormatter.format(amount)}.`,
+        });
     };
     const handleQuickAction = (label: string) => {
         if (label === "Pix") {
@@ -246,6 +261,11 @@ export default function DashboardPage() {
                                     {...action}
                                     onClick={() => handleQuickAction(action.label)}
                                     isActive={action.label === "Extrato" && isStatementOpen}
+                                    hoverVariant={
+                                        action.label === "Transferências" || action.label === "Mais ações"
+                                            ? "red"
+                                            : "green"
+                                    }
                                 />
                             ))}
                         </div>

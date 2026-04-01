@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 import { initialTransactions } from "../mocks/transactions.mock"
 import type { Transaction } from "../types/transaction"
 
@@ -29,36 +30,59 @@ function formatNow() {
     })
 }
 
-export const useDashboardStore = create<DashboardState>((set) => ({
-    balance: 2480.35,
-    limit: 1000,
-    transactions: initialTransactions,
+function calculateBalanceFromTransactions(transactions: Transaction[]) {
+    return transactions.reduce((total, transaction) => {
+        if (transaction.type === "income") {
+            return total + transaction.amount
+        }
 
-    addTransaction: (transaction) =>
-        set((state) => ({
-            transactions: [transaction, ...state.transactions],
-            balance:
-                transaction.type === "income"
-                    ? state.balance + transaction.amount
-                    : state.balance - transaction.amount,
-        })),
+        return total - transaction.amount
+    }, 0)
+}
 
-    receiveTransfer: (amount) =>
-        set((state) => {
-            const person =
-                randomPeople[Math.floor(Math.random() * randomPeople.length)]
+const initialBalance = calculateBalanceFromTransactions(initialTransactions)
+export const useDashboardStore = create<DashboardState>()(
+    persist(
+        (set) => ({
+            balance: initialBalance,
+            limit: 1000,
+            transactions: initialTransactions,
 
-            const newTransaction: Transaction = {
-                id: crypto.randomUUID(),
-                title: `PIX recebido de ${person}`,
-                amount,
-                type: "income",
-                date: formatNow(),
-            }
+            addTransaction: (transaction) =>
+                set((state) => ({
+                    transactions: [transaction, ...state.transactions],
+                    balance:
+                        transaction.type === "income"
+                            ? state.balance + transaction.amount
+                            : state.balance - transaction.amount,
+                })),
 
-            return {
-                balance: state.balance + amount,
-                transactions: [newTransaction, ...state.transactions],
-            }
+            receiveTransfer: (amount) =>
+                set((state) => {
+                    const person =
+                        randomPeople[Math.floor(Math.random() * randomPeople.length)]
+
+                    const newTransaction: Transaction = {
+                        id: crypto.randomUUID(),
+                        title: `PIX recebido de ${person}`,
+                        amount,
+                        type: "income",
+                        date: formatNow(),
+                    }
+
+                    return {
+                        balance: state.balance + amount,
+                        transactions: [newTransaction, ...state.transactions],
+                    }
+                }),
         }),
-}))
+        {
+            name: "onda-finance:dashboard",
+            partialize: (state) => ({
+                balance: state.balance,
+                limit: state.limit,
+                transactions: state.transactions,
+            }),
+        },
+    ),
+)

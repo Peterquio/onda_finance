@@ -3,14 +3,19 @@ import { useNavigate } from "react-router-dom"
 import { PixKeypad } from "../components/pix-keypad"
 import { usePixStore } from "../store/pix.store"
 import { digitsToMoney, formatCurrencyBRL, moneyToDigits } from "../utils/currency"
+import { useDashboardStore } from "@/features/dashboard/store/dashboard.store"
 
 export default function PixAmountPage() {
     const navigate = useNavigate()
     const { draft, setAmount, addLog, resetDraft } = usePixStore()
+    const balance = useDashboardStore((state) => state.balance)
+    const limit = useDashboardStore((state) => state.limit)
 
     const [digits, setDigits] = useState(moneyToDigits(draft.amount))
+    const [feedbackMessage, setFeedbackMessage] = useState("")
 
     const amount = useMemo(() => digitsToMoney(digits), [digits])
+    const availableAmount = useMemo(() => balance + limit, [balance, limit])
 
     function appendDigit(value: string) {
         setDigits((prev) => `${prev}${value}`.replace(/^0+(?=\d)/, ""))
@@ -26,8 +31,17 @@ export default function PixAmountPage() {
     }
 
     function handleConfirm() {
-        if (amount <= 0) return
+        if (amount <= 0) {
+            setFeedbackMessage("Digite um valor maior que zero.")
+            return
+        }
 
+        if (amount > availableAmount) {
+            setFeedbackMessage("Saldo + limite insuficientes para esta transferência.")
+            return
+        }
+
+        setFeedbackMessage("")
         setAmount(amount)
 
         addLog("PIX_AMOUNT_CONFIRMED", {
@@ -53,7 +67,9 @@ export default function PixAmountPage() {
             </div>
 
             <div className="rounded-2xl border p-6 text-center">
-                <p className="mb-2 text-sm text-muted-foreground">Valor</p>
+                <p className="mb-2 text-xs text-muted-foreground">
+                    Disponível para transferir: {formatCurrencyBRL(availableAmount)}
+                </p>
 
                 <div className="mb-4 text-4xl font-bold">{formatCurrencyBRL(amount)}</div>
 
@@ -64,6 +80,11 @@ export default function PixAmountPage() {
                     className="w-full rounded-2xl border px-4 py-3 text-center"
                     placeholder="Digite números"
                 />
+                {feedbackMessage && (
+                    <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700">
+                        {feedbackMessage}
+                    </div>
+                )}
             </div>
 
             <PixKeypad onKeyPress={appendDigit} onBackspace={removeDigit} />
