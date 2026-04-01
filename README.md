@@ -212,26 +212,22 @@ Embora este projeto seja front-end e utilize dados mockados, em um cenário real
 ## 📊 Dashboard
 
 <p align="center">
-  <img src="./prints/print_1.png" width="700"/>
+  <img src="./prints/print_1.png" width="300"/>
 </p>
 
 ## 🔐 Login
 
 <p align="center">
-  <img src="./prints/print_2.png" width="500"/>
-</p>
-
-## 💰 PIX
-
-<p align="center">
-  <img src="./prints/print_4.png" width="700"/>
+  <img src="./prints/print_2.png" width="300"/>
 </p>
 
 ## 💸 PIX
 
 <p align="center">
-  <img src="./prints/print_3.png" width="500"/>
+  <img src="./prints/print_4.png" width="300"/>
+  <img src="./prints/print_3.png" width="300"/>
 </p>
+
 ---
 
 ## 🏁 Conclusão
