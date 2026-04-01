@@ -95,15 +95,27 @@ export default function DashboardPage() {
 
     const [showBalance, setShowBalance] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isStatementOpen, setIsStatementOpen] = useState(false);
 
     const balance = useDashboardStore((state) => state.balance);
     const limit = useDashboardStore((state) => state.limit);
+    const transactions = useDashboardStore((state) => state.transactions);
     const receiveTransfer = useDashboardStore((state) => state.receiveTransfer);
 
     const totalWithLimit = useMemo(() => balance + limit, [balance, limit]);
 
     const handleDebugTransfer = (amount: number) => {
         receiveTransfer(amount);
+    };
+    const handleQuickAction = (label: string) => {
+        if (label === "Pix") {
+            navigate("/pix");
+            return;
+        }
+
+        if (label === "Extrato") {
+            setIsStatementOpen((current) => !current);
+        }
     };
 
     return (
@@ -221,7 +233,7 @@ export default function DashboardPage() {
                                 <QuickActionButton
                                     key={action.label}
                                     {...action}
-                                    onClick={action.label === "Pix" ? () => navigate("/pix") : undefined}
+                                    onClick={() => handleQuickAction(action.label)}
                                 />
                             ))}
                         </div>
@@ -243,6 +255,48 @@ export default function DashboardPage() {
                         <DebugTransferButton value={1000} onReceive={handleDebugTransfer} />
                     </div>
                 </section>
+                {isStatementOpen && (
+                    <section className="space-y-3">
+                        <div className="px-1">
+                            <h3 className="text-sm font-semibold text-foreground">Extrato</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Últimas movimentações da sua conta.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            {transactions.map((transaction) => {
+                                const isIncome = transaction.type === "income";
+
+                                return (
+                                    <Card
+                                        key={transaction.id}
+                                        className="rounded-2xl border bg-card shadow-sm"
+                                    >
+                                        <CardContent className="flex items-center justify-between gap-4 p-4">
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-semibold text-foreground">
+                                                    {transaction.title}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {transaction.date}
+                                                </p>
+                                            </div>
+
+                                            <p
+                                                className={`shrink-0 text-sm font-bold ${isIncome ? "text-green-600" : "text-red-600"
+                                                    }`}
+                                            >
+                                                {isIncome ? "+" : "-"}{" "}
+                                                {currencyFormatter.format(transaction.amount)}
+                                            </p>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </section>
+                )}
             </div>
         </main>
     );

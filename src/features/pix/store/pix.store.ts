@@ -164,7 +164,19 @@ export const usePixStore = create<PixStore>((set, get) => ({
             amount: draft.amount,
             transactionId: receipt.transactionId,
         })
-        useDashboardStore.getState().decreaseBalance(draft.amount)
+        useDashboardStore.getState().addTransaction({
+            id: crypto.randomUUID(),
+            title: `PIX enviado para ${draft.recipientName}`,
+            amount: draft.amount,
+            type: "expense",
+            date: new Date().toLocaleString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+            }),
+        })
         set((state) => ({
             transferHistory: [receipt, ...state.transferHistory],
             lastReceipt: receipt,
