@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom"
 import { usePixStore } from "../store/pix.store"
 import { formatCurrencyBRL } from "../utils/currency"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 
 export default function PixReceiptPage() {
     const navigate = useNavigate()
     const { lastReceipt, addLog } = usePixStore()
+    const currentUser = useAuthStore((state) => state.user)
 
     if (!lastReceipt) {
         return (
@@ -40,12 +42,12 @@ export default function PixReceiptPage() {
                 </div>
 
                 <div>
-                    <p className="text-sm text-muted-foreground">Nome</p>
-                    <p className="font-medium">{lastReceipt.recipientName}</p>
+                    <p className="text-sm text-muted-foreground">Remetente</p>
+                    <p className="font-medium">{currentUser?.fullName ?? "Cliente"}</p>
                 </div>
 
                 <div>
-                    <p className="text-sm text-muted-foreground">Pessoa que recebeu</p>
+                    <p className="text-sm text-muted-foreground">Destinatário</p>
                     <p className="font-medium">{lastReceipt.recipientName}</p>
                 </div>
 
